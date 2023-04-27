@@ -1,22 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { useParams } from "react-router-dom";
-import {
-  doc,
-  updateDoc,
-  onSnapshot,
-  collection,
-  addDoc,
-  QuerySnapshot,
-} from "firebase/firestore";
+import { useParams, Link } from "react-router-dom";
+import { doc, updateDoc, onSnapshot, collection } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
 import { Avatar } from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { storage } from "../firebase";
 import "./index.css";
+import { display } from "@mui/system";
 const Index = () => {
   let [ProfilePic, setProfilePic] = useState("");
   const { id } = useParams();
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState("");
   const [Posts, setPosts] = useState([]);
 
   useEffect(() => {
@@ -93,6 +88,34 @@ const Index = () => {
       setPosts(user.Posts.split(" "));
     }
   }, [user.Posts]);
+  const openPost = (index) => {
+    const postToOpen = Posts[index];
+    const modal = document.createElement("div");
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+    modal.style.display = "flex";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+
+    const postImage = document.createElement("img");
+    postImage.src = postToOpen;
+    postImage.alt = `Post ${index}`;
+    postImage.style.maxWidth = "100%";
+    postImage.style.maxHeight = "100%";
+
+    modal.appendChild(postImage);
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  };
   return (
     <div>
       <div className="scoutgram">Scoutgram</div>
@@ -101,7 +124,7 @@ const Index = () => {
         <Avatar
           onClick={() => document.getElementById("PrInput").click()}
           src={user.ProfilePic}
-          sx={{ width: 200, height: 200, borderRadius: "50%" }}
+          sx={{ width: "30vw", height: "30vw", borderRadius: "50%" }}
           style={{
             marginLeft: "5%",
             marginTop: "3%",
@@ -115,7 +138,7 @@ const Index = () => {
           onChange={handleProfilePic}
         />
       </div>
-      <div style={{ textAlign: "left", marginLeft: "5%", fontSize:"200%"}}>
+      <div style={{ textAlign: "left", marginLeft: "5%", fontSize: "150%" }}>
         <b>{user.Nome}</b>
         <br />
         {user.Descrizione}
@@ -124,14 +147,12 @@ const Index = () => {
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-5 my-2 rounded"
           onClick={handleDescrizione}
-          style={{width: "30%" }}
         >
           Modifica Descrizione
         </button>
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-5 my-2 rounded"
           onClick={handleNome}
-          style={{width: "30%" }}
         >
           {" "}
           Modifica Nome
@@ -146,7 +167,9 @@ const Index = () => {
                 key={index}
                 src={post}
                 alt={`${index}`}
+                style={{ width: "100%", height: "auto", aspectRatio: "1/1" }}
                 class="w-full h-full object-cover"
+                onClick={() => openPost(index)}
               />
             );
           })}
@@ -163,12 +186,27 @@ const Index = () => {
       >
         <hr class=" col w-full border-black-2 border-t-2 z-10 " />
         <button
-          class=" col w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full mx-auto text-white hover:from-blue-600 hover:to-blue-800 shadow-lg flex justify-center items-center"
+          class=" col bg-gradient-to-r from-blue-500 to-blue-700 rounded-full mx-auto text-white hover:from-blue-600 hover:to-blue-800 shadow-lg absolute justify-center items-center"
+          style={{ height: "10vw", width: "10vw", padding: "10" }}
           onClick={() => document.getElementById("Posts").click()}
         >
           <svg viewBox="0 0 24 24" class="w-8.5 h-8.5 fill-current">
             <path d="M12 4a8 8 0 1 0 8 8a8 8 0 0 0-8-8zM11 11V7h2v4h4v2h-4v4h-2v-4H7v-2h4z" />
           </svg>
+        </button>
+        <button
+          class="bg-gradient-to-r from-blue-500 to-blue-700 rounded-full  text-white hover:from-blue-600 hover:to-blue-800 shadow-lg flex justify-center items-center"
+          style={{
+            height: "10vw",
+            width: "10vw",
+            marginLeft: "auto",
+            padding: "10",
+          }}
+        >
+          <AccountCircleIcon
+            style={{ fontSize: "10vw" }}
+            onClick={() => document.getElementById("Account").click()}
+          />
         </button>
       </div>
       <input
@@ -178,6 +216,7 @@ const Index = () => {
         style={{ display: "none" }}
         onChange={handlePosts}
       />
+      <Link to="/account" style={{ display: "none" }} id="Account"/>
     </div>
   );
 };
